@@ -19,7 +19,7 @@ my $VERSION = "2.1";
 # sacct -P -n -a --format JobID,User,Group,State,Cluster,AllocCPUS,REQMEM,TotalCPU,Elapsed,MaxRSS,ExitCode,NNodes,NTasks -j <job_id>
 
 my %opts;
-getopts('hvdf:',\%opts);
+getopts('hvdf:M:',\%opts);
 
 if (exists $opts{v}) {
     print "seff Version $VERSION\n";
@@ -31,6 +31,7 @@ if (exists $opts{h} || scalar @ARGV != 1) {
     print "       -h    Help menu\n";
     print "       -v    Version\n";
     print "       -d    Debug mode: display raw Slurm data\n";
+    print "       -M <cluster>   cluster specification\n";
     exit 1;
 }
 my $mydebug = 0;
@@ -45,7 +46,9 @@ my $slurm = Slurm::new();
 # Get cluster name from SLurm config file.
 my $conf = $slurm->load_ctl_conf();
 my $clustername = $conf->{'cluster_name'};
-
+if (exists $opts{M}) {
+     $clustername = $opts{M};
+}
 my %job_cond = ();
 $job_cond{flags} = JOBCOND_FLAG_NO_TRUNC;
 $job_cond{cluster_list} = [$clustername];
